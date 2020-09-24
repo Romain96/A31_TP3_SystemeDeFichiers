@@ -26,7 +26,21 @@ public class Directory implements SystemComponent
 	
 	///////////////////////////////////////////////////////////////////////////
 	
+	
+	@Override
+	public void add(SystemComponent component)
+	{
+		this.children.add(component);
+	}
+	
+	
+	@Override
+	public void remove(SystemComponent component)
+	{
+		this.children.remove(component);
+	}
 
+	
 	@Override
 	public String getName()
 	{

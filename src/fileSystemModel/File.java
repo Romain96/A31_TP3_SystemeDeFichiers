@@ -27,6 +27,18 @@ public class File implements SystemComponent
 	
 	
 	@Override
+	public void add(SystemComponent component)
+	{
+		return;
+	}
+
+	@Override
+	public void remove(SystemComponent component)
+	{
+		return;
+	}
+	
+	@Override
 	public String getName()
 	{
 		return this.name;
@@ -74,5 +86,4 @@ public class File implements SystemComponent
 	{
 		return;
 	}
-
 }

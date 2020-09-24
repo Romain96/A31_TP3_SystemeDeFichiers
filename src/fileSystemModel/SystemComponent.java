@@ -15,6 +15,10 @@ public interface SystemComponent
 	public void setParent(SystemComponent parent);
 	public void setChildren(ArrayList<SystemComponent> children);
 	
+	// methods
+	public void add(SystemComponent component);
+	public void remove(SystemComponent component);
+	
 	// debug - print component
 	public String toString();
 }
