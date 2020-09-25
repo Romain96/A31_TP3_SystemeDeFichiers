@@ -30,23 +30,32 @@ public class FileSystem
 	
 	// finding a specific component by name by 
 	// traversing the tree in a breadth-first fashion
-	private SystemComponent find(String name)
-	{
-		return this.internalFind(this.root, name);
-	}
-	
-	private SystemComponent internalFind(SystemComponent node, String name)
-	{
-		if (node != null)
+	public SystemComponent find(String name)
+	{	
+		if (this.root.getName().equalsIgnoreCase(name))
 		{
+			return this.root;
+		}
+		
+		ArrayList<SystemComponent> list = new ArrayList<SystemComponent>();
+		for (SystemComponent component: this.root.getChildren())
+		{
+			list.add(component);
+		}
+		
+		while(!list.isEmpty())
+		{
+			SystemComponent node = list.get(0);
+			list.remove(0);
+			
 			if (node.getName().equalsIgnoreCase(name))
 			{
 				return node;
 			}
 			
-			for (SystemComponent child: node.getChildren())
+			for (SystemComponent component: node.getChildren())
 			{
-				return this.internalFind(child, name);
+				list.add(component);
 			}
 		}
 		return null;
@@ -107,6 +116,45 @@ public class FileSystem
 	// remove a directory
 	// move a file from a directory to another
 	// move a directory from a directory to another
+	
+	private void getTreeString(SystemComponent node, String localPath, ArrayList<String> branches)
+	{
+		if (node.getChildren() == null)
+		{
+			branches.add(localPath + "/" + node.getName());
+		}
+		else
+		{
+			for (SystemComponent child: node.getChildren())
+			{
+				this.getTreeString(child,  localPath + "/" + node.getName(), branches);
+			}
+		}
+	}
+	
+	// to string - prints the tree (depth-first fashion)
+	public String toString()
+	{
+		if (this.root.getChildren() == null)
+		{
+			return this.root.getName();
+		}
+		
+		// finding leaves
+		ArrayList<String> list = new ArrayList<String>();
+		for (SystemComponent child: this.root.getChildren())
+		{
+			// not printing "/"
+			this.getTreeString(child, "", list);
+		}
+		
+		String tree = "";
+		for (String branch: list)
+		{
+			tree = tree + branch + "\n";
+		}
+		return tree;
+	}
 	
 	///////////////////////////////////////////////////////////////////////////
 	
