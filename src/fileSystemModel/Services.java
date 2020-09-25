@@ -1,8 +1,8 @@
 package fileSystemModel;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.io.*;
 
 // Contains services on FileSystem
 public class Services
@@ -229,6 +229,54 @@ public class Services
 	}
 	
 	// serialization of path
+	public void saveComponent(String name) throws Exception
+	{
+		// finding the file/directory name
+		SystemComponent component = this.system.find(name);
+		
+		if (component == null)
+		{
+			throw new Exception("Services.saveComponent : " + name + " does not exist !");
+		}
+		else
+		{
+			try
+			{
+				FileOutputStream fileOut = new FileOutputStream(component.getName() + ".ser");
+				ObjectOutputStream out = new ObjectOutputStream(fileOut);
+				out.writeObject(component);
+				out.close();
+				fileOut.close();
+			}
+			catch (IOException i)
+			{
+				i.printStackTrace();
+			}
+		}
+	}
+	
+	public SystemComponent loadComponent(String filename)
+	{
+		try
+		{
+	         FileInputStream fileIn = new FileInputStream(filename);
+	         ObjectInputStream in = new ObjectInputStream(fileIn);
+	         SystemComponent component = (SystemComponent) in.readObject();
+	         in.close();
+	         fileIn.close();
+	         return component;
+		}
+		catch (IOException i)
+		{
+	         i.printStackTrace();
+		}
+		catch (ClassNotFoundException c)
+		{
+	         System.out.println("Services.loadComponent : " + filename + " class Directory/File not found !");
+	         c.printStackTrace();
+		}
+		return null;
+	}
 	
 	///////////////////////////////////////////////////////////////////////////
 	

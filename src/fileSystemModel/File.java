@@ -3,8 +3,13 @@ package fileSystemModel;
 import java.util.ArrayList;
 
 // Represents a file with a content (leaf)
-public class File implements SystemComponent
+public class File implements SystemComponent, java.io.Serializable
 {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8759377431858762239L;
 	
 	// attributes
 	private String name;

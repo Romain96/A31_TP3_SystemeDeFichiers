@@ -3,8 +3,13 @@ package fileSystemModel;
 import java.util.ArrayList;
 
 // Represents a directory containing both File and Directory (both SystemComponent)
-public class Directory implements SystemComponent
+public class Directory implements SystemComponent, java.io.Serializable
 {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2947967258767176361L;
 	
 	// attributes
 	public String name;
