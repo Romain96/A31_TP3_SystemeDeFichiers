@@ -43,15 +43,16 @@ public class Services
 		}
 	}
 	
+	
 	// list of all descendants of a common ancestor
-	public ArrayList<String> getAllDescendants(String name) throws Exception
+	public ArrayList<String> getAllDescendants(String ancestor) throws Exception
 	{
 		// finding the file/directory name
-		SystemComponent component = this.system.find(name);
+		SystemComponent component = this.system.find(ancestor);
 		
 		if (component == null)
 		{
-			throw new Exception("Services.getAllDescendants : " + name + " does not exist !");
+			throw new Exception("Services.getAllDescendants : " + ancestor + " does not exist !");
 		}
 		else
 		{	
@@ -70,6 +71,82 @@ public class Services
 				}
 				else
 				{
+					leaves.add(node);
+					for (SystemComponent child: node.getChildren())
+					{
+						toProcess.add(child);
+					}
+				}
+			}
+			System.out.println("TEST : \n" + leaves);
+			
+			// climbing the tree to get partial paths up to the starting directory
+			ArrayList<String> descendants = new ArrayList<String>();
+			for (SystemComponent leaf: leaves)
+			{
+				if (leaf.getParent() == null)
+				{
+					descendants.add("/");
+				}
+				else
+				{
+					String localName = leaf.getName();
+					SystemComponent node = leaf.getParent();
+					while (!node.getName().equalsIgnoreCase(component.getName()))
+					{
+						localName = node.getName() + "/" + localName;
+						node = node.getParent();
+					}
+					if (component.getParent() == null)
+					{
+						descendants.add("/" + localName);
+					}
+					else
+					{
+						descendants.add(component.getName() + "/" + localName);
+					}
+				}
+			}
+			
+			return descendants;
+		}
+	}
+	
+	
+	// list of all descendants of a common ancestor having a specific name
+	public ArrayList<String> getAllDescendantsWithName(String ancestor, String name) throws Exception
+	{
+		// finding the file/directory name
+		SystemComponent component = this.system.find(ancestor);
+		
+		if (component == null)
+		{
+			throw new Exception("Services.getAllDescendantsWithName : " + ancestor + " does not exist !");
+		}
+		else
+		{	
+			// finding all descendants (leaves : empty directories & files)
+			ArrayList<SystemComponent> leaves = new ArrayList<SystemComponent>();
+			ArrayList<SystemComponent> toProcess = new ArrayList<SystemComponent>();
+			toProcess.add(component);
+			
+			while (!toProcess.isEmpty())
+			{
+				SystemComponent node = toProcess.get(0);
+				toProcess.remove(0);
+				if (node.getChildren() == null)
+				{
+					if (node.getName().equalsIgnoreCase(name))
+					{
+						leaves.add(node);
+					}
+				}
+				else
+				{
+					if (node.getName().equalsIgnoreCase(name))
+					{
+						leaves.add(node);
+					}
 					for (SystemComponent child: node.getChildren())
 					{
 						toProcess.add(child);
@@ -101,8 +178,6 @@ public class Services
 			return descendants;
 		}
 	}
-	
-	// list of all descendants of a common ancestor having a specific name
 	
 	// total size of a directory
 	

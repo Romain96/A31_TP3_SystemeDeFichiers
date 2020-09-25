@@ -16,7 +16,8 @@ public class Main
 		
 		Services services = new Services(system);
 		System.out.println(services.getFullPath("users.txt"));
-		System.out.println(services.getAllDescendants("Images"));
+		System.out.println(services.getAllDescendants("/"));
+		System.out.println(services.getAllDescendantsWithName("/", "Documents"));
 	}
 
 }
