@@ -15,9 +15,11 @@ public class Main
 		System.out.println(system);
 		
 		Services services = new Services(system);
-		System.out.println(services.getFullPath("users.txt"));
-		System.out.println(services.getAllDescendants("/"));
-		System.out.println(services.getAllDescendantsWithName("/", "Documents"));
+		//System.out.println(services.getFullPath("users.txt"));
+		//System.out.println(services.getAllDescendants("/"));
+		//System.out.println(services.getAllDescendantsWithName("/", "Documents"));
+		
+		System.out.println("Size of / : " + services.getSizeOfDirectory("/"));
 	}
 
 }

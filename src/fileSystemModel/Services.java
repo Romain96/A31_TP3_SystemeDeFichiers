@@ -1,5 +1,7 @@
 package fileSystemModel;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 // Contains services on FileSystem
@@ -179,7 +181,52 @@ public class Services
 		}
 	}
 	
+	
 	// total size of a directory
+	private int getRecSizeOfDirectory(SystemComponent dir)
+	{
+		if (dir instanceof File)
+		{
+			return dir.getContent().getBytes(StandardCharsets.UTF_8).length;
+		}
+		else if (dir instanceof Directory)
+		{
+			// empty directory
+			if (dir.getChildren() == null)
+			{
+				return 4096;
+			}
+			else
+			{
+				int subsize = 4096;
+				for (SystemComponent child: dir.getChildren())
+				{
+					subsize = subsize + this.getRecSizeOfDirectory(child);
+				}
+				return subsize;
+			}
+		}
+		return 0;
+	}
+	
+	public int getSizeOfDirectory(String dirname) throws Exception
+	{
+		// finding the file/directory name
+		SystemComponent component = this.system.find(dirname);
+				
+		if (component == null)
+		{
+			throw new Exception("Services.getSizeOfDirectory : " + dirname + " does not exist !");
+		}
+		else if (!(component instanceof Directory))
+		{
+			throw new Exception("Services.getSizeOfDirectory : " + dirname + " is not a directory !");
+		}
+		else
+		{
+			return this.getRecSizeOfDirectory(component);
+		}
+	}
 	
 	// serialization of path
 	
