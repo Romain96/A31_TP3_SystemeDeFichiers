@@ -76,7 +76,8 @@ public class FileSystem
 			if (basedir instanceof Directory)
 			{
 				// creating a new directory
-				SystemComponent dir = new Directory(directoryName, basedir);
+				//SystemComponent dir = new Directory(directoryName, basedir);
+				SystemComponent dir = ComponentFactory.getSystemComponent(this, SystemComponentType.DIRECTORY, directoryName, parentName, null);
 				basedir.add(dir);
 				this.components.add(dir);
 			}
