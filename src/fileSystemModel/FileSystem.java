@@ -52,10 +52,12 @@ public class FileSystem
 			{
 				return node;
 			}
-			
-			for (SystemComponent component: node.getChildren())
+			else if (node.getChildren() != null)
 			{
-				list.add(component);
+				for (SystemComponent component: node.getChildren())
+				{
+					list.add(component);
+				}
 			}
 		}
 		return null;
@@ -75,9 +77,9 @@ public class FileSystem
 		{
 			if (basedir instanceof Directory)
 			{
-				// creating a new directory
-				//SystemComponent dir = new Directory(directoryName, basedir);
-				SystemComponent dir = ComponentFactory.getSystemComponent(this, SystemComponentType.DIRECTORY, directoryName, parentName, null);
+				// creating a new directory using the factory
+				SystemComponent dir = ComponentFactory.getSystemComponent(this, 
+						SystemComponentType.DIRECTORY, directoryName, parentName, null);
 				basedir.add(dir);
 				this.components.add(dir);
 			}
@@ -87,6 +89,7 @@ public class FileSystem
 			}
 		}
 	}
+	
 	
 	// create a new file inside a specific directory
 	public void createFile(String fileName, String parentName, String fileContent) throws Exception
@@ -101,8 +104,10 @@ public class FileSystem
 		{
 			if (basedir instanceof Directory)
 			{
-				// creating a new directory
-				SystemComponent file = new File(fileName, fileContent, basedir);
+				// creating a new directory using the factory
+				//SystemComponent file = new File(fileName, fileContent, basedir);
+				SystemComponent file = ComponentFactory.getSystemComponent(this, 
+						SystemComponentType.FILE, fileName, parentName, fileContent);
 				basedir.add(file);
 				this.components.add(file);
 			}
@@ -112,26 +117,7 @@ public class FileSystem
 			}
 		}
 	}
-	
-	// remove a file
-	// remove a directory
-	// move a file from a directory to another
-	// move a directory from a directory to another
-	
-	private void getTreeString(SystemComponent node, String localPath, ArrayList<String> branches)
-	{
-		if (node.getChildren() == null)
-		{
-			branches.add(localPath + "/" + node.getName());
-		}
-		else
-		{
-			for (SystemComponent child: node.getChildren())
-			{
-				this.getTreeString(child,  localPath + "/" + node.getName(), branches);
-			}
-		}
-	}
+
 	
 	// to string - prints the tree (depth-first fashion)
 	public String toString()
@@ -141,20 +127,51 @@ public class FileSystem
 			return this.root.getName();
 		}
 		
-		// finding leaves
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<SystemDisplayPair> branches = new ArrayList<SystemDisplayPair>();
 		for (SystemComponent child: this.root.getChildren())
 		{
-			// not printing "/"
-			this.getTreeString(child, "", list);
+			branches.add(new SystemDisplayPair(child, "/"));
+		}
+		String display = "";
+		
+		// processing all nodes in depth-first fashion
+		while (!branches.isEmpty())
+		{
+			// getting the current node
+			SystemDisplayPair pair = branches.get(0);
+			branches.remove(0);
+			SystemComponent node = pair.getKey();
+			String path = pair.getValue();
+			
+			// final path
+			path = path + "\\" + node.getName();
+			
+			if (node instanceof File)
+			{
+				// adding this complete path to the display string
+				display = display + "\n" + path;
+			}
+			else if (node instanceof Directory)
+			{
+				if (node.getChildren() == null || node.getChildren().isEmpty())
+				{
+					// adding this complete path to the display string
+					display = display + "\n" + path + "\\";
+				}
+				else
+				{
+					// adding all children to the list (depth-first so inserting them before already present items)
+					int index = 0;
+					for (SystemComponent child: node.getChildren())
+					{
+						branches.add(index, new SystemDisplayPair(child, path));
+						index++;
+					}
+				}
+			}
 		}
 		
-		String tree = "";
-		for (String branch: list)
-		{
-			tree = tree + branch + "\n";
-		}
-		return tree;
+		return display;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
