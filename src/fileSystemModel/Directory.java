@@ -2,29 +2,13 @@ package fileSystemModel;
 
 import java.util.ArrayList;
 
-// Represents a directory containing both File and Directory (both SystemComponent)
-public class Directory implements SystemComponent, java.io.Serializable
+public class Directory extends SystemComponent
 {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2947967258767176361L;
-	
-	// attributes
-	public String name;
-	public SystemComponent parent;
-	public ArrayList<SystemComponent> children;
-	
-	
-	///////////////////////////////////////////////////////////////////////////
-	
-	
+
 	// constructor
-	public Directory(String name, SystemComponent parent)
+	public Directory(String name, String content)
 	{
-		this.name = name;
-		this.parent = parent;
+		super(name, content);
 		this.children = new ArrayList<SystemComponent>();
 	}
 	
@@ -35,63 +19,17 @@ public class Directory implements SystemComponent, java.io.Serializable
 	@Override
 	public void add(SystemComponent component)
 	{
+		// adding the component as a child of the current one
 		this.children.add(component);
+		// and designating the current component as the given component's parent
+		component.setParent(this);
 	}
 	
 	
 	@Override
-	public void remove(SystemComponent component)
-	{
-		this.children.remove(component);
-	}
-
-	
-	@Override
-	public String getName()
+	public String toString()
 	{
 		return this.name;
-	}
-
-	@Override
-	public String getContent()
-	{
-		return null;
-	}
-
-	@Override
-	public SystemComponent getParent()
-	{
-		return this.parent;
-	}
-
-	@Override
-	public ArrayList<SystemComponent> getChildren()
-	{
-		return this.children;
-	}
-
-	@Override
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	@Override
-	public void setContent(String content)
-	{
-		return;
-	}
-
-	@Override
-	public void setParent(SystemComponent parent)
-	{
-		this.parent = parent;
-	}
-
-	@Override
-	public void setChildren(ArrayList<SystemComponent> children)
-	{
-		this.children = children;
 	}
 
 }

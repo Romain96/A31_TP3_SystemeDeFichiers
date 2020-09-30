@@ -2,189 +2,313 @@ package fileSystemModel;
 
 import java.util.ArrayList;
 
-// Contains all files & directories (the complete tree)
 public class FileSystem
 {
 	
 	// attributes
-	public SystemComponent root;	// root directory
-	public ArrayList<SystemComponent> components;	// all files & subdirectories
-	
+	private SystemComponent root;
+	private SystemComponent workingDir;
+
 	
 	///////////////////////////////////////////////////////////////////////////
 	
 	
 	// constructor
-	public FileSystem()
+	public FileSystem() throws Exception
 	{
-		// creates the root directory & adds it to the list
-		this.components = new ArrayList<SystemComponent>();
-		this.root = new Directory("/", null);
-		this.components.add(this.root);
+		// creating root
+		this.root = SystemComponentFactory.getSystemComponent("root", "/", "");
+		// setting the working directory on the created root
+		this.workingDir = this.root;
 	}
 	
 	
 	///////////////////////////////////////////////////////////////////////////
 	
-	// methods
 	
-	// finding a specific component by name by 
-	// traversing the tree in a breadth-first fashion
-	public SystemComponent find(String name)
-	{	
-		if (this.root.getName().equalsIgnoreCase(name))
-		{
-			return this.root;
-		}
-		
-		ArrayList<SystemComponent> list = new ArrayList<SystemComponent>();
-		for (SystemComponent component: this.root.getChildren())
-		{
-			list.add(component);
-		}
-		
-		while(!list.isEmpty())
-		{
-			SystemComponent node = list.get(0);
-			list.remove(0);
-			
-			if (node.getName().equalsIgnoreCase(name))
-			{
-				return node;
-			}
-			else if (node.getChildren() != null)
-			{
-				for (SystemComponent component: node.getChildren())
-				{
-					list.add(component);
-				}
-			}
-		}
-		return null;
-	}
-	
-	
-	// create a new directory inside a specific directory
-	public void createDirectory(String directoryName, String parentName) throws Exception
+	// inserting a file in the tree at the current directory
+	public void insertFile(SystemComponent file) throws Exception
 	{
-		// finding parent name by descending the tree (breadth-first)
-		SystemComponent basedir = this.find(parentName);
-		if (basedir == null)
+		if (this.filenameIsValid(file, this.workingDir))
 		{
-			throw new Exception("Directory " + parentName + " does not exist.");
+			this.workingDir.add(file);
 		}
 		else
 		{
-			if (basedir instanceof Directory)
-			{
-				// creating a new directory using the factory
-				SystemComponent dir = ComponentFactory.getSystemComponent(this, 
-						SystemComponentType.DIRECTORY, directoryName, parentName, null);
-				basedir.add(dir);
-				this.components.add(dir);
-			}
-			else
-			{
-				throw new Exception("Directory " + parentName + " is not a directory.");
-			}
+			throw new Exception("FileSystem.insertFile ERROR - " + file.getName() + " is already taken");
 		}
 	}
 	
 	
-	// create a new file inside a specific directory
-	public void createFile(String fileName, String parentName, String fileContent) throws Exception
+	// inserting a directory (empty or not) in the tree at the current directory
+	public void insertDirectory(SystemComponent dir) throws Exception
 	{
-		// finding parent name by descending the tree (breadth-first)
-		SystemComponent basedir = this.find(parentName);
-		if (basedir == null)
+		if (this.dirnameIsValid(dir, this.workingDir))
 		{
-			throw new Exception("Directory " + parentName + " does not exist.");
+			this.workingDir.add(dir);
 		}
 		else
 		{
-			if (basedir instanceof Directory)
-			{
-				// creating a new directory using the factory
-				//SystemComponent file = new File(fileName, fileContent, basedir);
-				SystemComponent file = ComponentFactory.getSystemComponent(this, 
-						SystemComponentType.FILE, fileName, parentName, fileContent);
-				basedir.add(file);
-				this.components.add(file);
-			}
-			else
-			{
-				throw new Exception("Directory " + parentName + " is not a directory.");
-			}
+			throw new Exception("FileSystem.insertDirectory ERROR - " + dir.getName() + " is already taken");
 		}
 	}
-
 	
-	// to string - prints the tree (depth-first fashion)
-	public String toString()
+	
+	// deleting a file in the tree at the current directory
+	public void deleteFile(String filename) throws Exception
 	{
-		if (this.root.getChildren() == null)
+		// searching amongst children of the current directory
+		for (SystemComponent child: this.workingDir.getChildren())
 		{
-			return this.root.getName();
+			if (child instanceof File && child.getName().equals(filename))
+			{
+				this.workingDir.getChildren().remove(child);
+				return;
+			}
+		}
+		throw new Exception("FileSystem.deleteFile ERROR - " + filename + " does not exist");
+	}
+	
+	
+	// deleting a directory (empty or not) in the tree at the current directory
+	public void deleteDirectory(String dirname) throws Exception
+	{
+		// searching amongst children of the current directory
+		for (SystemComponent child: this.workingDir.getChildren())
+		{
+			if (child instanceof Directory && child.getName().equals(dirname))
+			{
+				this.recursiveRemove(child);
+				this.workingDir.getChildren().remove(child);
+				return;
+			}
+		}
+		throw new Exception("FileSystem.deleteDirectory ERROR - " + dirname + " does not exist");
+	}
+	
+	private void recursiveRemove(SystemComponent node)
+	{
+		// halting case -> leaf / File
+		if (node instanceof File)
+		{
+			node.parent = null;
+			return;
 		}
 		
-		ArrayList<SystemDisplayPair> branches = new ArrayList<SystemDisplayPair>();
+		// halting case -> leaf / empty Directory
+		if (node instanceof Directory && node.getChildren().isEmpty())
+		{
+			node.parent = null;
+			return;
+		}
+		
+		// recursive case -> non-empty directory
+		for (SystemComponent child: node.getChildren())
+		{
+			this.recursiveRemove(child);
+		}
+		node.children.clear();
+		node.children = null;
+		node.parent = null;
+	}
+	
+	
+	// moving a file (changing its local path/name) in the tree at the current directory
+	public void moveFile(String oldname, String newname) throws Exception
+	{
+		// searching the file in the working directory
+		boolean fold = false;
+		boolean fnew = false;
+		SystemComponent oldComponent = null;
+		for (SystemComponent child: this.workingDir.getChildren())
+		{
+			if (child instanceof File && child.getName().equals(oldname) && !fold)
+			{
+				oldComponent = child;
+				fold = true;
+			}
+			if (child instanceof File && child.getName().equals(newname) && !fnew)
+			{
+				fnew = true;
+			}
+		}
+		
+		// oldname not found
+		if (!fold)
+		{
+			throw new Exception("FileSystem.moveFile ERROR - " + oldname + " does not exist");
+		}
+		
+		// newname already taken
+		if (fnew)
+		{
+			throw new Exception("FileSystem.moveFile ERROR - " + newname + " is already taken");
+		}
+		
+		// renaming
+		oldComponent.setName(newname);
+	}
+	
+	
+	// moving a directory (changing its local path/name) in the tree at the current directory
+	public void moveDirectory(String oldname, String newname) throws Exception
+	{
+		// searching the file in the working directory
+		boolean fold = false;
+		boolean fnew = false;
+		SystemComponent oldComponent = null;
+		for (SystemComponent child: this.workingDir.getChildren())
+		{
+			if (child instanceof Directory && child.getName().equals(oldname) && !fold)
+			{
+				oldComponent = child;
+				fold = true;
+			}
+			if (child instanceof Directory && child.getName().equals(newname) && !fnew)
+			{
+				fnew = true;
+			}
+		}
+		
+		// oldname not found
+		if (!fold)
+		{
+			throw new Exception("FileSystem.moveDirectory ERROR - " + oldname + " does not exist");
+		}
+		
+		// newname already taken
+		if (fnew)
+		{
+			throw new Exception("FileSystem.moveDirectory ERROR - " + newname + " is already taken");
+		}
+		
+		// renaming
+		oldComponent.setName(newname);
+	}
+	
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	
+	public ArrayList<String> getDisplay()
+	{
+		ArrayList<SystemComponent> leaves = new ArrayList<SystemComponent>();
+		ArrayList<SystemComponent> nodes = new ArrayList<SystemComponent>();
+		ArrayList<String> display = new ArrayList<String>();
+		
+		if (this.root.getChildren().isEmpty())
+		{
+			display.add((String) "/\\");
+			return display;
+		}
+		
+		// finding all leaves
 		for (SystemComponent child: this.root.getChildren())
 		{
-			branches.add(new SystemDisplayPair(child, "/"));
+			nodes.add(child);
 		}
-		String display = "";
-		
-		// processing all nodes in depth-first fashion
-		while (!branches.isEmpty())
+		while (!nodes.isEmpty())
 		{
-			// getting the current node
-			SystemDisplayPair pair = branches.get(0);
-			branches.remove(0);
-			SystemComponent node = pair.getKey();
-			String path = pair.getValue();
-			
-			// final path
-			path = path + "\\" + node.getName();
+			SystemComponent node = nodes.get(0);
+			nodes.remove(0);
 			
 			if (node instanceof File)
 			{
-				// adding this complete path to the display string
-				display = display + "\n" + path;
+				leaves.add(node);
 			}
 			else if (node instanceof Directory)
 			{
-				if (node.getChildren() == null || node.getChildren().isEmpty())
+				if (node.getChildren().isEmpty())
 				{
-					// adding this complete path to the display string
-					display = display + "\n" + path + "\\";
+					leaves.add(node);
 				}
 				else
 				{
-					// adding all children to the list (depth-first so inserting them before already present items)
-					int index = 0;
 					for (SystemComponent child: node.getChildren())
 					{
-						branches.add(index, new SystemDisplayPair(child, path));
-						index++;
+						nodes.add(child);
 					}
 				}
 			}
 		}
 		
+		System.out.println("leaves : " + leaves);
+		
+		// creating paths for all leaves
+		for (SystemComponent leaf: leaves)
+		{
+			String path = "\\" + leaf.getName();
+			SystemComponent parent = leaf.getParent();
+			System.out.println("processing " + leaf.getName() + " parent is " + parent.getName());
+			
+			while(parent != null)
+			{
+				path = "\\" + parent.getName() + path;
+				parent = parent.getParent();
+			}
+			display.add(path.substring(1));
+		}
+		
 		return display;
 	}
 	
-	///////////////////////////////////////////////////////////////////////////
 	
-	// getters/setters
-	public SystemComponent getRoot()
+	public String toString()
 	{
-		return root;
+		ArrayList<String> branches = this.getDisplay();
+		String display = "";
+		
+		for (String branch: branches)
+		{
+			display = display + "\n" + branch;
+		}
+		
+		return display;
 	}
 	
-	public ArrayList<SystemComponent> getComponents()
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	
+	// checks whether the name of file is not already taken by another file inside dir
+	private boolean filenameIsValid(SystemComponent file, SystemComponent wdir)
 	{
-		return this.components;
+		for (SystemComponent child: wdir.getChildren())
+		{
+			if (child instanceof File && child.getName().equals(file.getName()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	// checks whether the name of directory is not already taken by another directory inside dir
+	private boolean dirnameIsValid(SystemComponent dir, SystemComponent wdir)
+	{
+		for (SystemComponent child: wdir.getChildren())
+		{
+			if (child instanceof Directory && child.getName().equals(dir.getName()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+		
+		
+	///////////////////////////////////////////////////////////////////////////
+	
+	
+	public SystemComponent getRoot()
+	{
+		return this.root;
+	}
+	
+	public SystemComponent getWorkingDir()
+	{
+		return this.workingDir;
 	}
 	
 	public void setRoot(SystemComponent root)
@@ -192,8 +316,8 @@ public class FileSystem
 		this.root = root;
 	}
 	
-	public void setComponents(ArrayList<SystemComponent> components)
+	public void setWorkingDir(SystemComponent workingDir)
 	{
-		this.components = components;
+		this.workingDir = workingDir;
 	}
 }
