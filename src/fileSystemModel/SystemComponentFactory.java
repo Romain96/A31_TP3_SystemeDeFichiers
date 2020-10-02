@@ -37,6 +37,9 @@ public class SystemComponentFactory
 	}
 	
 	
+	///////////////////////////////////////////////////////////////////////////
+	
+	
 	private static boolean nameIsValid(String name)
 	{
 		if (name.contains("/"))

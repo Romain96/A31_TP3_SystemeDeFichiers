@@ -54,6 +54,9 @@ public class FileSystem
 	}
 	
 	
+	///////////////////////////////////////////////////////////////////////////
+	
+	
 	// deleting a file in the tree at the current directory
 	public void deleteFile(String filename) throws Exception
 	{
@@ -113,8 +116,11 @@ public class FileSystem
 	}
 	
 	
-	// moving a file (changing its local path/name) in the tree at the current directory
-	public void moveFile(String oldname, String newname) throws Exception
+	///////////////////////////////////////////////////////////////////////////
+	
+	
+	// generic move of component
+	public void moveComponent(String oldname, String newname) throws Exception
 	{
 		// searching the file in the working directory
 		boolean fold = false;
@@ -132,56 +138,41 @@ public class FileSystem
 				fnew = true;
 			}
 		}
-		
+				
 		// oldname not found
 		if (!fold)
 		{
-			throw new Exception("FileSystem.moveFile ERROR - " + oldname + " does not exist");
+			throw new Exception("FileSystem.moveComponent ERROR - " + oldname + " does not exist");
 		}
-		
+				
 		// newname already taken
 		if (fnew)
 		{
-			throw new Exception("FileSystem.moveFile ERROR - " + newname + " is already taken");
+			throw new Exception("FileSystem.moveComponent ERROR - " + newname + " is already taken");
 		}
 		
+		if (oldComponent instanceof Directory)
+		{
+			this.moveDirectory(oldComponent, newname);
+		}
+		else if (oldComponent instanceof File)
+		{
+			this.moveFile(oldComponent, newname);
+		}
+	}
+	
+	
+	// moving a file (changing its local path/name) in the tree at the current directory
+	private void moveFile(SystemComponent oldComponent, String newname)
+	{	
 		// renaming
 		oldComponent.setName(newname);
 	}
 	
 	
 	// moving a directory (changing its local path/name) in the tree at the current directory
-	public void moveDirectory(String oldname, String newname) throws Exception
+	private void moveDirectory(SystemComponent oldComponent, String newname)
 	{
-		// searching the file in the working directory
-		boolean fold = false;
-		boolean fnew = false;
-		SystemComponent oldComponent = null;
-		for (SystemComponent child: this.workingDir.getChildren())
-		{
-			if (child instanceof Directory && child.getName().equals(oldname) && !fold)
-			{
-				oldComponent = child;
-				fold = true;
-			}
-			if (child instanceof Directory && child.getName().equals(newname) && !fnew)
-			{
-				fnew = true;
-			}
-		}
-		
-		// oldname not found
-		if (!fold)
-		{
-			throw new Exception("FileSystem.moveDirectory ERROR - " + oldname + " does not exist");
-		}
-		
-		// newname already taken
-		if (fnew)
-		{
-			throw new Exception("FileSystem.moveDirectory ERROR - " + newname + " is already taken");
-		}
-		
 		// renaming
 		oldComponent.setName(newname);
 	}
