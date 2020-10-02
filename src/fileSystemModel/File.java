@@ -3,6 +3,11 @@ package fileSystemModel;
 public class File extends SystemComponent
 {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3485542272635765960L;
+
 	// constructor
 	public File(String name, String content)
 	{

@@ -232,14 +232,11 @@ public class FileSystem
 			}
 		}
 		
-		System.out.println("leaves : " + leaves);
-		
 		// creating paths for all leaves
 		for (SystemComponent leaf: leaves)
 		{
 			String path = "\\" + leaf.getName();
 			SystemComponent parent = leaf.getParent();
-			System.out.println("processing " + leaf.getName() + " parent is " + parent.getName());
 			
 			while(parent != null)
 			{

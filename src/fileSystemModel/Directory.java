@@ -5,6 +5,11 @@ import java.util.ArrayList;
 public class Directory extends SystemComponent
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5065330822629587725L;
+
 	// constructor
 	public Directory(String name, String content)
 	{

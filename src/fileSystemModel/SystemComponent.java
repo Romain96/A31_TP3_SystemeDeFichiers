@@ -1,8 +1,14 @@
 package fileSystemModel;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class SystemComponent
+public abstract class SystemComponent implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5643755473872483356L;
+	
 	// attributes
 	protected String name;
 	protected String content;

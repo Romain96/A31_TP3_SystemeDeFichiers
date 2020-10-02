@@ -39,6 +39,19 @@ public class Main
 		system.setWorkingDir(system.getRoot());
 		
 		System.out.println(system);
+		
+		System.out.println(Services.getFullPath(dirUML));
+		
+		System.out.println(Services.getDescendants(system.getRoot()));
+		
+		System.out.println(Services.getSize(dirUML));
+		System.out.println(Services.getSize(dirDocuments));
+		System.out.println(Services.getSize(fileUsers));
+		System.out.println(Services.getSize(system.getRoot()));
+		
+		Services.saveComponent(fileUsers, "users.ser");
+		SystemComponent loaded = Services.loadComponent("users.ser");
+		System.out.println(loaded);
 	}
 
 }
