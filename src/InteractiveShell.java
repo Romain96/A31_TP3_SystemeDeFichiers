@@ -1,5 +1,3 @@
-package fileSystemModel;
-
 import java.io.Console;
 import java.util.List;
 
@@ -16,7 +14,7 @@ public class InteractiveShell
 		try (JShell jsh = JShell.create())
 		{
 			// imports
-			jsh.eval("import fileSystemModel.*;");
+			jsh.eval("import fileSystemModel.Terminal;");
 			
 			// creating a Terminal (creates a FileSystem with a root)
 			jsh.eval("Terminal t = 	new Terminal();");
