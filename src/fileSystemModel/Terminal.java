@@ -85,20 +85,29 @@ public class Terminal
 	// cd(<dirname>)
 	public void cd(String dirname) throws Exception
 	{
-		if (this.system.getWorkingDir().getChildren().isEmpty())
+		if (dirname.equals(".."))
+		{
+			if (this.system.getWorkingDir().getParent() != null)
+			{
+				this.system.setWorkingDir(this.system.getWorkingDir().getParent());
+			}
+		}
+		else if (this.system.getWorkingDir().getChildren().isEmpty())
 		{
 			throw new Exception("Terminal ERROR - current working directory (" + this.system.getWorkingDir().getName() + ") is empty");
 		}
-		
-		for (SystemComponent child: this.system.getWorkingDir().getChildren())
+		else
 		{
-			if (child instanceof Directory && child.getName().equals(dirname))
+			for (SystemComponent child: this.system.getWorkingDir().getChildren())
 			{
-				this.system.setWorkingDir(child);
-				return;
+				if (child instanceof Directory && child.getName().equals(dirname))
+				{
+					this.system.setWorkingDir(child);
+					return;
+				}
 			}
+			throw new Exception("Terminal ERROR - directory " + dirname + " does not exist");
 		}
-		throw new Exception("Terminal ERROR - directory " + dirname + " does not exist");
 	}
 	
 	

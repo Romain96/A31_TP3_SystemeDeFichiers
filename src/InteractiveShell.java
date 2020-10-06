@@ -32,9 +32,17 @@ public class InteractiveShell
 				
 				String[] arg = input.split("\\s");	// whitespace character
 				input = "t." + arg[0] + "(";
-				if (arg.length > 1)
+				if (arg.length == 2)
 				{
 					input = input + '"' + arg[1] + '"';
+				}
+				else if (arg.length > 2)
+				{
+					for (int i = 1; i < arg.length; i++)
+					{
+						input = input + '"' + arg[i] + '"' + ',';
+					}
+					input = input.substring(0, input.length() - 1);
 				}
 				input = input + ");";
 				

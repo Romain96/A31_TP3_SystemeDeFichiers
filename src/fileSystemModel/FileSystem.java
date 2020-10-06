@@ -128,12 +128,12 @@ public class FileSystem
 		SystemComponent oldComponent = null;
 		for (SystemComponent child: this.workingDir.getChildren())
 		{
-			if (child instanceof File && child.getName().equals(oldname) && !fold)
+			if (child.getName().equals(oldname) && !fold)
 			{
 				oldComponent = child;
 				fold = true;
 			}
-			if (child instanceof File && child.getName().equals(newname) && !fnew)
+			if (child.getName().equals(newname) && !fnew)
 			{
 				fnew = true;
 			}
